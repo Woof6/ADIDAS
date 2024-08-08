@@ -1,2 +1,2 @@
-# ADIDAS
-The offfical implementation of ADIDAS
+# DiDA
+The offfical implementation of DiDA
