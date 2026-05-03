@@ -1,0 +1,5 @@
+work_dirs/
+__pycache__/
+code_5.2/
+configs/generated
+*.pth
