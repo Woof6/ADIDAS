@@ -930,23 +930,12 @@ class DACSt(UDADecorator):
         mix_masks = get_class_masks(gt_semantic_seg)
 
 
-
-        # p=1.0 每张都抹；scale=(0.7, 0.7) 固定面积比例为 70%；ratio=(1.0, 1.0) 近似正方形
-        eraser = T.RandomErasing(p=1.0, scale=(0.01, 0.05), ratio=(0.3, 3.3), value=0.0, inplace=False)
-
-        # 在生成伪标签之前对 target_img 逐张处理（RandomErasing 接受 3D 张量 CxHxW）
-        target_img_erased = target_img.clone()
-        for i in range(target_img_erased.size(0)):
-            for _ in range(20):
-                target_img_erased[i] = eraser(target_img_erased[i])
-                
                 
         for i in range(batch_size):
             strong_parameters['mix'] = mix_masks[i]
             mixed_img[i], mixed_lbl[i] = strong_transform(
                 strong_parameters,
-                # data=torch.stack((img[i], target_img[i])),
-                data=torch.stack((img[i], target_img_erased[i])),
+                data=torch.stack((img[i], target_img[i])),
                 target=torch.stack((gt_semantic_seg[i][0], pseudo_label[i])))
             _, pseudo_weight[i] = strong_transform(
                 strong_parameters,
@@ -1024,7 +1013,7 @@ class DACSt(UDADecorator):
                                    'class_mix_debug')
             os.makedirs(out_dir, exist_ok=True)
             vis_img = torch.clamp(denorm(img, means, stds), 0, 1)
-            vis_trg_img = torch.clamp(denorm(target_img_erased, means, stds), 0, 1)
+            vis_trg_img = torch.clamp(denorm(target_img, means, stds), 0, 1)
             vis_mixed_img = torch.clamp(denorm(mixed_img, means, stds), 0, 1)
             vis_img_sample = torch.clamp(denorm(img_sample, means, stds), 0, 1)
             vis_mixed_img_sample = torch.clamp(denorm(target_img_sample, means, stds), 0, 1)
